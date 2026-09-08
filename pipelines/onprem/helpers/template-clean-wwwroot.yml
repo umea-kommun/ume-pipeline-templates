@@ -12,7 +12,7 @@ parameters:
 
 steps:
   - powershell: |
-      Write-Host "[Ume]: Cleaning wwwroot..."
+      Write-Host "Cleaning wwwroot..."
       $wwwrootPath = "${{ parameters.path }}/wwwroot"
       $maxRetries = ${{ parameters.maxRetries }}
       $retryDelay = ${{ parameters.retryDelay }}
@@ -21,7 +21,7 @@ steps:
       for ($i = 1; $i -le $maxRetries; $i++) {
         try {
           if ($i -ne 1) {
-            Write-Host "[Ume]: Retrying in $($retryDelay)s..."
+            Write-Host "Retrying in $($retryDelay)s..."
             Start-Sleep -Seconds $retryDelay
           }
 
@@ -30,14 +30,14 @@ steps:
 
           $currentItemCount = (Get-ChildItem $wwwrootPath -Exclude 'app_offline.htm').Count
           if ($currentItemCount -ne 0) {
-            throw "[Ume]: wwwroot still contains $currentItemCount item(s) after cleanup"
+            throw "wwwroot still contains $currentItemCount item(s) after cleanup"
           }
 
           $success = $true
           break
         }
         catch {
-          Write-Host "[Ume]: Clean wwwroot failed on attempt #$i."
+          Write-Host "Clean wwwroot failed on attempt #$i."
           Write-Warning $_
         }
       }

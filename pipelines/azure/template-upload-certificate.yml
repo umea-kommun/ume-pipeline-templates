@@ -36,9 +36,9 @@ jobs:
                 scriptType: pscore
                 scriptLocation: inlineScript
                 inlineScript: |
-                  Write-Host "[Ume]: Certificate = [${{ parameters.certificateName }}.pfx]"
-                  Write-Host "[Ume]: Key Vault = [${{ parameters.keyVaultName }}]"
-                  Write-Host "[Ume]: Uploading certificate to key vault..."
+                  Write-Host "Certificate = [${{ parameters.certificateName }}.pfx]"
+                  Write-Host "Key Vault = [${{ parameters.keyVaultName }}]"
+                  Write-Host "Uploading certificate to key vault..."
 
                   az keyvault certificate import `
                     --vault-name ${{ parameters.keyVaultName }} `
@@ -47,4 +47,4 @@ jobs:
                     --password '${{ parameters.certificatePassword }}' `
                     --output none
 
-                  Write-Host "[Ume]: Finished!"
+                  Write-Host "Finished!"

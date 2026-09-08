@@ -10,7 +10,7 @@ steps:
   - powershell: |
       $appOfflinePath = "${{ parameters.path }}/wwwroot/app_offline.htm"
 
-      Write-Host "[Ume]: Creating app_offline.htm..."
+      Write-Host "Creating app_offline.htm..."
       $appOfflineContent = "<html><head><title>Application is offline</title></head><body><h1>Application is offline</h1></body></html>"
       $appOfflineContent | Out-File -FilePath $appOfflinePath
     displayName: Disable application
