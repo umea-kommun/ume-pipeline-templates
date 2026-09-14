@@ -40,6 +40,11 @@ parameters:
     type: boolean
     default: true
 
+  # Optional. See template-generate-package-version.yml.
+  - name: packageVersion
+    type: string
+    default: ''
+
 jobs:
   - job: GeneratePackageVersionJob
     displayName: Generate package version
@@ -51,6 +56,7 @@ jobs:
           packageName: ${{ parameters.packageName }}
           isStableRelease: ${{ parameters.isStableRelease }}
           shouldPublish: ${{ parameters.shouldPublish }}
+          packageVersion: ${{ parameters.packageVersion }}
 
   - job: BuildNugetJob
     displayName: Build NuGet package

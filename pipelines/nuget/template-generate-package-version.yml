@@ -15,6 +15,12 @@ parameters:
     type: boolean
     default: true
 
+  # Optional. When set, the script emits this version instead of computing one.
+  # Use it to give several packages one shared version computed in a single job.
+  - name: packageVersion
+    type: string
+    default: ''
+
 steps:
   - checkout: self
     path: source
@@ -35,6 +41,7 @@ steps:
       PACKAGE_PATH: ${{ parameters.packagePath }}
       PACKAGE_NAME: ${{ parameters.packageName }}
       IS_STABLE_RELEASE: ${{ parameters.isStableRelease }}
+      PACKAGE_VERSION: ${{ parameters.packageVersion }}
 
   - task: PowerShell@2
     displayName: Tag Current Build
