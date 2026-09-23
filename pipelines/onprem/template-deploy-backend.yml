@@ -28,6 +28,14 @@ parameters:
     type: object
     default: []
 
+  - name: pingMaxRetries
+    type: number
+    default: 3
+
+  - name: pingRetryDelay
+    type: number
+    default: 5
+
 jobs:
   - job: ValidateDirectoriesJob
     displayName: Validate Directories
@@ -85,6 +93,8 @@ jobs:
                   parameters:
                     hostUrl: ${{ parameters.internalHostUrl }}
                     pingEndpoints: ${{ parameters.pingEndpoints }}
+                    maxRetries: ${{ parameters.pingMaxRetries }}
+                    retryDelay: ${{ parameters.pingRetryDelay }}
                     pingType: Internal
 
             - ${{ if ne(parameters.externalHostUrl, '') }}:
@@ -92,6 +102,8 @@ jobs:
                   parameters:
                     hostUrl: ${{ parameters.externalHostUrl }}
                     pingEndpoints: ${{ parameters.pingEndpoints }}
+                    maxRetries: ${{ parameters.pingMaxRetries }}
+                    retryDelay: ${{ parameters.pingRetryDelay }}
                     pingType: External
                     certificateSecureFile: ${{ parameters.externalCertificateSecureFile }}
                     certificatePassword: ${{ parameters.externalCertificatePassword }}
@@ -142,6 +154,8 @@ jobs:
             parameters:
               hostUrl: ${{ parameters.internalHostUrl }}
               pingEndpoints: ${{ parameters.pingEndpoints }}
+              maxRetries: ${{ parameters.pingMaxRetries }}
+              retryDelay: ${{ parameters.pingRetryDelay }}
               pingType: Internal
 
       - ${{ if ne(parameters.externalHostUrl, '') }}:
@@ -149,6 +163,8 @@ jobs:
             parameters:
               hostUrl: ${{ parameters.externalHostUrl }}
               pingEndpoints: ${{ parameters.pingEndpoints }}
+              maxRetries: ${{ parameters.pingMaxRetries }}
+              retryDelay: ${{ parameters.pingRetryDelay }}
               pingType: External
               certificateSecureFile: ${{ parameters.externalCertificateSecureFile }}
               certificatePassword: ${{ parameters.externalCertificatePassword }}
