@@ -64,6 +64,18 @@ BEGIN CATCH
 END CATCH;
 "@
 
+$dropStaleUserQuery = @"
+IF EXISTS (
+    SELECT 1 FROM sys.database_principals
+    WHERE name = N'`$(Identity)'
+        AND sid <> CAST(CAST(N'`$(ClientId)' AS uniqueidentifier) AS varbinary(16))
+)
+BEGIN
+    DROP USER [`$(Identity)];
+    SELECT 1 AS Dropped;
+END
+"@
+
 $addOwnerQuery = @"
 BEGIN TRANSACTION;
 BEGIN TRY
@@ -79,6 +91,23 @@ BEGIN CATCH
     THROW;
 END CATCH;
 "@
+
+function Get-ServicePrincipalClientId([String] $displayName) {
+    $escapedDisplayName = $displayName.Replace("'", "''")
+    $clientIds = @(az ad sp list `
+            --filter "displayName eq '$escapedDisplayName'" `
+            --query "[].appId" `
+            -o tsv)
+
+    if ($LASTEXITCODE -ne 0) {
+        throw "Failed to look up service principal [$displayName]."
+    }
+    if ($clientIds.Count -gt 1) {
+        throw "Found $($clientIds.Count) service principals named [$displayName]."
+    }
+
+    return $clientIds | Select-Object -First 1
+}
 
 if ([string]::IsNullOrWhiteSpace($serverName)) {
     throw "SQL Server name is not provided."
@@ -233,6 +262,21 @@ foreach ($database in $databases) {
     }
 
     foreach ($user in $database.users) {
+        $clientId = Get-ServicePrincipalClientId -displayName $user
+        if ($clientId) {
+            $dropped = Invoke-Sqlcmd `
+                -ServerInstance $serverInstance `
+                -Database $database.name `
+                -AccessToken $accessToken `
+                -Query $dropStaleUserQuery `
+                -Variable @{ Identity = $user; ClientId = $clientId } `
+                -OutputSqlErrors $true
+
+            if ($dropped) {
+                Write-Host "Removed user [$user] bound to a replaced identity."
+            }
+        }
+
         Write-Host "Adding user [$user]..."
         Invoke-Sqlcmd `
             -ServerInstance $serverInstance `
