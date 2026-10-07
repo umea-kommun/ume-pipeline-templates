@@ -17,7 +17,7 @@ variables:
         value: Ume_ServiceConnection_Test-Turkos
   - ${{ if eq(parameters.environment, 'dev') }}:
       - name: serviceConnection
-        value: Ume_ServiceConnection_Dev-Turkos
+        value: Ume_ServiceConnection_Dev_2.0
 
   # Pipeline build name
   - ${{ if startsWith(variables['Build.SourceBranch'], 'refs/heads/') }}:

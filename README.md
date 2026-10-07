@@ -119,7 +119,7 @@ The templates use standard variables defined in `template-default-pipeline-varia
 
 - **`environment`** - Target environment (dev, test, prod)
 - **`serviceConnection`** - Automatically selected based on environment:
-  - dev → `Ume_ServiceConnection_Dev-Turkos`
+  - dev → `Ume_ServiceConnection_Dev_2.0`
   - test → `Ume_ServiceConnection_Test-Turkos`
   - prod → `Ume_ServiceConnection_Prod-Turkos`
 - **`buildName`** - Automatically generated from branch and environment
