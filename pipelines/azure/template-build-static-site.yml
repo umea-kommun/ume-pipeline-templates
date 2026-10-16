@@ -1,0 +1,28 @@
+parameters:
+  - name: projectFolderName
+    type: string
+
+  - name: projectParentFolderPath
+    type: string
+    default: src
+
+  - name: outputDirectory
+    type: string
+    default: wwwroot
+
+jobs:
+  - job: BuildStaticSiteJob
+    displayName: Build Static Site
+    steps:
+      - task: CopyFiles@2
+        displayName: Bundle ${{ parameters.outputDirectory }}
+        inputs:
+          SourceFolder: ${{ parameters.projectParentFolderPath }}/${{ parameters.projectFolderName }}/${{ parameters.outputDirectory }}
+          Contents: '**'
+          TargetFolder: $(Build.ArtifactStagingDirectory)/deployment-bundle/${{ parameters.outputDirectory }}
+
+      - task: PublishPipelineArtifact@1
+        displayName: Publish Bundled Build Artifact
+        inputs:
+          targetPath: $(Build.ArtifactStagingDirectory)/deployment-bundle
+          artifactName: ${{ parameters.projectFolderName }}

@@ -1,0 +1,50 @@
+parameters:
+  - name: environment
+    type: string
+
+  - name: templateRepoAlias
+    type: string
+
+  - name: projectFolderName
+    type: string
+
+  - name: deploymentToken
+    type: string
+
+  - name: entraTenantId
+    type: string
+    default: 6666873a-59e7-46b0-b92e-00af0a3633e2
+
+  - name: outputDirectory
+    type: string
+    default: wwwroot
+
+jobs:
+  - deployment: DeployStaticSiteJob
+    displayName: Deploy to ${{ parameters.environment }}
+    environment: ${{ parameters.environment }}
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+            - checkout: ${{ parameters.templateRepoAlias }}
+              path: templates
+
+            - task: PowerShell@2
+              displayName: Write Entra authentication config
+              inputs:
+                targetType: filePath
+                filePath: $(Pipeline.Workspace)/templates/pipelines/azure/scripts/write-static-site-config.ps1
+              env:
+                APP_PATH: $(Pipeline.Workspace)/${{ parameters.projectFolderName }}/${{ parameters.outputDirectory }}
+                ENTRA_TENANT_ID: ${{ parameters.entraTenantId }}
+
+            - task: AzureStaticWebApp@0
+              displayName: Deploy Static Web App
+              inputs:
+                azure_static_web_apps_api_token: ${{ parameters.deploymentToken }}
+                workingDirectory: $(Pipeline.Workspace)/${{ parameters.projectFolderName }}
+                skip_app_build: true
+                skip_api_build: true
+                app_location: ${{ parameters.outputDirectory }}
+                output_location: '.'
