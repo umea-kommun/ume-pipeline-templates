@@ -20,6 +20,18 @@ parameters:
     type: string
     default: ''
 
+  - name: shouldRequireEntraSignIn
+    type: boolean
+    default: false
+
+  - name: templateRepoAlias
+    type: string
+    default: templates
+
+  - name: entraTenantId
+    type: string
+    default: 6666873a-59e7-46b0-b92e-00af0a3633e2
+
 jobs:
   - deployment: DeployStaticWebAppJob
     displayName: Deploy to ${{ parameters.environment }}
@@ -28,6 +40,20 @@ jobs:
       runOnce:
         deploy:
           steps:
+            - ${{ if eq(parameters.shouldRequireEntraSignIn, true) }}:
+              - checkout: ${{ parameters.templateRepoAlias }}
+                path: templates
+
+              - task: PowerShell@2
+                displayName: Write Entra authentication config
+                inputs:
+                  targetType: filePath
+                  filePath: $(Pipeline.Workspace)/templates/pipelines/azure/scripts/write-static-site-config.ps1
+                env:
+                  APP_PATH: $(Pipeline.Workspace)/${{ parameters.projectFolderName }}/${{ parameters.outputDirectory }}
+                  ENTRA_TENANT_ID: ${{ parameters.entraTenantId }}
+                  SHOULD_MERGE_EXISTING_CONFIG: true
+
             - task: AzureStaticWebApp@0
               displayName: Deploy Static Web App
               inputs:
