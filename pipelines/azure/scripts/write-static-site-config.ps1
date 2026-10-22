@@ -59,7 +59,7 @@ if (-not $config.responseOverrides) {
 }
 $config.responseOverrides['401'] = [ordered]@{
     statusCode = 302
-    redirect   = '/.auth/login/aad'
+    redirect   = '/.auth/login/aad?post_login_redirect_uri=.referrer'
 }
 if (-not $config.responseOverrides.Contains('404') -and (Test-Path -LiteralPath (Join-Path $appPath '404.html') -PathType Leaf)) {
     $config.responseOverrides['404'] = @{ rewrite = '/404.html' }
