@@ -27,18 +27,23 @@ if ([string]::IsNullOrWhiteSpace($userEmail)) {
     ThrowError("User Email is not provided.")
 }
 
-$repositoryUrl = "github.com/$organization/$repository.git"
-$remoteUrl = "https://$accessToken@$repositoryUrl"
+$repositoryUrl = "https://github.com/$organization/$repository.git"
+$basicAuth = [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes("x-access-token:$accessToken"))
+Write-Host "##vso[task.setsecret]$basicAuth"
 
 Write-Host "Configuring git identity..."
 git config user.name "$userName"
+if ($LASTEXITCODE -ne 0) { ThrowError("Git command failed with exit code $LASTEXITCODE") }
 git config user.email "$userEmail"
+if ($LASTEXITCODE -ne 0) { ThrowError("Git command failed with exit code $LASTEXITCODE") }
 
 Write-Host "Fetching latest '$branch' from origin..."
 git fetch origin $branch
+if ($LASTEXITCODE -ne 0) { ThrowError("Git command failed with exit code $LASTEXITCODE") }
 
 Write-Host "Checking out '$branch'..."
 git checkout $branch
+if ($LASTEXITCODE -ne 0) { ThrowError("Git command failed with exit code $LASTEXITCODE") }
 
 Write-Host "Current HEAD:"
 git log -1 --oneline
@@ -50,12 +55,15 @@ $remotes = git remote
 if ($remotes -match '^github$') {
     Write-Host "Resetting 'github' remote..."
     git remote remove github
+    if ($LASTEXITCODE -ne 0) { ThrowError("Git command failed with exit code $LASTEXITCODE") }
 }
 
 Write-Host "Adding GitHub remote..."
-git remote add github $remoteUrl
+git remote add github $repositoryUrl
+if ($LASTEXITCODE -ne 0) { ThrowError("Git command failed with exit code $LASTEXITCODE") }
 
 Write-Host "Pushing branch '$branch' to GitHub..."
-git push github "refs/heads/$($branch):refs/heads/$branch" --force
+git -c "http.https://github.com/.extraheader=AUTHORIZATION: basic $basicAuth" push github "refs/heads/$($branch):refs/heads/$branch" --force
+if ($LASTEXITCODE -ne 0) { ThrowError("Git push failed with exit code $LASTEXITCODE") }
 
 Write-Host "Finished!"
